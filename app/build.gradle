@@ -1,0 +1,40 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "com.iqiyi.splitdexapk"
+        multiDexEnabled true
+        minSdkVersion 15
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    dexOptions {
+        if (project.findProperty('hack_builder') == 'true') {
+            dexInProcess = true
+            additionalParameters = ['--main-dex-list=' + projectDir+'/maindexlist.txt',
+                                    '--minimal-main-dex', '--sub-dexes-list=' + projectDir + '/subdexeslist.txt']
+        } else if (project.findProperty('hack_dx') == 'true') {
+            dexInProcess = false
+            additionalParameters = ['--main-dex-list=' + projectDir + '/maindexlist.txt',
+                                    '--minimal-main-dex', '--sub-dexes-list=' + projectDir+'/subdexeslist.txt']
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation project(':far')
+    implementation project(':boo')
+    implementation files('libs/gson-2.8.4.jar')
+}

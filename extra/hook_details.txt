@@ -1,0 +1,76 @@
+# Hack Details
+
+dx.jar source url：    https://android.googlesource.com/platform/dalvik demo  base on 26.0.2
+build.gradle source url：https://android.googlesource.com/platform/tools/base
+We will control the process of create dex and set names to the dex files
+
+
+ private static List<Set<String>> getSubDexesPath(String fileName) throws IOException {
+        List<Set<String>> dexPaths = new ArrayList<Set<String>>();
+        Set<String> subDexClassPaths = null;
+        BufferedReader bfr = null;
+        try {
+            FileReader fr = new FileReader(fileName);
+            bfr = new BufferedReader(fr);
+            String line;
+            while (null != (line = bfr.readLine())) {
+                if (line.startsWith("--subdex-start")) {
+                    subDexClassPaths = new HashSet<String>();
+                    String[] dexNameStr = line.split("\\|");
+                    if (dexNameStr.length >= 2) {
+                        dexNameList.add(dexNameStr[1]);
+                    }
+                } else if (line.startsWith("--subdex-over")) {
+                    dexPaths.add(subDexClassPaths);
+                } else if (!"".equals(line)) {
+                    subDexClassPaths.add(fixPath(line));
+                }
+            }
+        } finally {
+            if (bfr != null) {
+                bfr.close();
+            }
+        }
+        return dexPaths;
+    }
+
+
+
+
+  if (args.subDexesListFiles != null) {
+                    filtersInSubDexes = new ArrayList<FileNameFilter>();
+
+                    for (int i = 0; i < classesInSubDexes.size(); i++) {
+                        filtersInSubDexes.add(new SubDexListFilter(i));
+                    }
+
+                    for (int i = 0; i < fileNames.length; i++) {
+                        for (int j = 0; j < classesInSubDexes.size(); j++) {
+                            processOne(fileNames[i], filtersInSubDexes.get(j));
+                            isSubDexProcessed = true;
+                        }
+                    }
+}
+
+
+   while(((numMethodIds + maxMethodIdsInClass + maxMethodIdsInProcess
+                            > args.maxNumberOfIdxPerDex) ||
+                            (numFieldIds + maxFieldIdsInClass + maxFieldIdsInProcess
+                                    > args.maxNumberOfIdxPerDex)) || isSubDexProcessed) {
+                                    ......
+                                    }
+
+
+  modify the method of rename dex。source file：com.android.builder.internal.packaging.DexIncrementalRenameManager.java
+
+
+    ......
+    else {
+            // Add remaining new files.
+            newFiles.forEach(
+                    //nf -> buckets.add(new Bucket(nf, supplier.get(), BucketAction.CREATE)));
+                    nf -> {
+                        buckets.add(new Bucket(nf, nf.getOsIndependentRelativePath()+".dex", BucketAction.CREATE));
+                        System.out.println("build dex name  -> " + nf.getOsIndependentRelativePath()+".dex");
+                    });
+        }

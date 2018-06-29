@@ -1,0 +1,72 @@
+
+1. dexSpliter 主要功能是按需拆分dex
+
+    dex文件的输入为混淆class文件，具体拆解成哪些dex，可根据实际需要灵活划分。
+    python脚本会自动收集class类，demo简单按照module进行dex拆分，包含：
+        1. module 自身java 代码
+        2. module/Libs下jar包
+        3. aar（如果有）
+
+2. 混淆class类的分类是通过对比mapping.txt文件获取
+
+3. python脚本输出结果
+        apk位置：          ./app/build/outputs/apk/release/app-release-unsigned.apk
+        apk 拆分结果：      ./apk_spliter_result
+
+
+具体执行：
+方式1-- hack tools.builder.gradle 方式：
+
+    1.1 需要编译tools.builder.gradle源码：
+        tools.builder.gradle源码下载地址： https://android.googlesource.com/platform/tools/base
+
+        hack 文件：
+        com.android.dx.command.dexer.Main.java
+        com.android.dx.command.Main.java
+        Acom.android.builder.internal.packaging.DexIncrementalRenameManager.java
+
+        dx部分源码hack见extra/hack_dx.zip,packaging阶段源码见extra/DexIncrementalRenameManager.java
+
+    1.2 执行步骤：
+        1.2.1   python文件目录：/extra/splitdex
+        1.2.2   更改python 脚本：config.ini 为本地变量，其中
+                hack_para = hack_builder=true
+        1.2.3   更改dexSpliter/build.gradle对应本地maven仓库位置
+
+                buildscript {
+                    repositories {
+                        if (project.findProperty('hack_builder') == 'true') {
+                            maven {url '../../gradle_source_code/out/repo' }
+                        }
+                        google()
+                        jcenter()
+                    }
+                }
+
+        1.2.4 将extra/TestClassForMainDex.java,加入主工程java代码中，将extra/maindexlist.txt中com/iqiyi/dexspliter/TestClassForMainDex.class
+              修改为正确路径
+        1.2.5 执行 python apk_spliter.py
+        1.2.6 生成的apk文件位置  /app/build/outputs/apk/release/app-release-unsigned.apk  生成的解析结果文件/apk_splitter_result.txt
+
+方式2--- hack dx.jar 方式：
+
+    2.1 编译原理：
+        dx.jar编译源码地址：   https://android.googlesource.com/platform/dalvik demo基于26.0.2
+        dx源码hack内容同方式1
+        dx.jar 生成过程见 hack_dx.zip    更改 ./buildJar.sh 配置为本地环境，然后执行 ./buildJar.sh
+
+       ps:demo中已提供hack过的dx.jar可直接使用
+
+
+    2.2 执行步骤：
+        2.2.1   使用extra/dx.jar 替换本地 ../sdk/build-tools/26.0.2/lib/dx.jar
+        2.2.2   python文件目录：/extra/splitdex
+        2.2.3   更改config.ini 为本地变量，其中
+                hack_para = hack_dx=true
+        2.2.4  将extra/TestClassForMainDex.java,加入主工程java代码中，将extra/maindexlist.txt中com/iqiyi/dexspliter/TestClassForMainDex.class
+               修改为正确路径
+        2.2.5  执行 python apk_spliter.py
+        2.2.6  生成的apk文件位置  /app/build/outputs/apk/release/app-release-unsigned.apk
+        2.2.7  生成的apk已经按照指定的业务分析，生成了对应的dex文件，可以反解压apk，分析dex具体归属。也可以编写脚本（主要通过比对class名称），自动分析。
+
+
