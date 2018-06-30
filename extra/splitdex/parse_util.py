@@ -290,7 +290,7 @@ def save_apkparse_result(module_file_list, file_path):
         return
     f = open(file_path, 'w')
 
-    f.write('modlue_name'+ add_spaces('modlue_name')+'dex_name' + add_spaces('    ') +
+    f.write('module_name'+ add_spaces('module_name')+'dex_name' + add_spaces('    ') +
             'dex_size'  + "        file_type       "  + 'file_size\n')
     f.write('-----------------------------------------------------------------------------------------\n')
     for module_file in module_file_list:
@@ -299,7 +299,7 @@ def save_apkparse_result(module_file_list, file_path):
             round(module_file.dex_file_size / 1024, 1)) + "k            res             " + str(
             round(module_file.total_res_size / 1024, 1)) + 'k\n'
         f.write(pre)
-    f.write('---------------------------------------------------------------------------------------\n')
+    f.write('-----------------------------------------------------------------------------------------')
     f.close()
 
 
