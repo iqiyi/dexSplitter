@@ -71,8 +71,7 @@ dexSplitter 主要针对源码部分，提供了一套彻底的分析APK dex组�
 
 
 # License
-+ 
-Copyright (c) 2018-present, 爱奇艺, Inc. All rights reserved.
++ Copyright (c) 2018-present, 爱奇艺, Inc. All rights reserved.
 dexSplitter中大多数的源码使用 MIT 许可证，另外的一些源码使用 Apache 样式的许可证。
 详细信息请查看 LICENSE 文件。
 
